@@ -28,7 +28,7 @@ class DataValidation:
         except Exception as e:
             raise RainPredictionException(e, sys)
     
-    def validate_numer_of_columns(self, dataframe: pd.DataFrame) -> bool:
+    def validate_number_of_columns(self, dataframe: pd.DataFrame) -> bool:
         """_summary_
 
         Args:
@@ -123,12 +123,12 @@ class DataValidation:
             train_dataframe, test_dataframe = (DataValidation.read_data(file_path=self.data_ingestion_artifact.trained_file_path),
                                                DataValidation.read_data(file_path=self.data_ingestion_artifact.tested_file_path))
             
-            status = self.validate_numer_of_columns(dataframe=train_dataframe)
+            status = self.validate_number_of_columns(dataframe=train_dataframe)
             logging.info(f"All required columns present in training DataFrame: {status}.")
             if not status:
                 validation_error_msg == f"Columns are missing in training DataFrame."
             
-            status = self.validate_numer_of_columns(dataframe=test_dataframe)
+            status = self.validate_number_of_columns(dataframe=test_dataframe)
             logging.info(f"All required columns present in testing DataFrame: {status}.")
             if not status:
                 validation_error_msg == f"Columns are missing in testing DataFrame."

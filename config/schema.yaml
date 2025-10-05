@@ -50,6 +50,7 @@ categorical_columns:
   - RainToday
   - RainTomorrow
 
+# for data cleaning
 drop_columns:
   - Date
   - MinTemp
@@ -63,6 +64,11 @@ drop_columns:
   - Temp9am
   - Temp3pm
 
+direction_columns:
+  - WindGustDir
+  - WindDir9am
+  - WindDir3pm
+
 # for data transformation
 num_columns:
   - Rainfall
@@ -71,18 +77,13 @@ num_columns:
   - WindSpeed3pm
   - Humidity9am
   - Humidity3pm
-  - WindGustAngle
-  - WindAngle9am
-  - WindAngle3pm
+  - WindGustDir
+  - WindDir9am
+  - WindDir3pm
 
 one_hot_columns:
   - Location
   - RainToday
 
-ordinal_column:
+target_column:
   - RainTomorrow
-
-tranform_columns:
-  - WindGustDir
-  - WindDir9am
-  - WindDir3pm
