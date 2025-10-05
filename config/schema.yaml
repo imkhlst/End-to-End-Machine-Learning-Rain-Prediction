@@ -63,6 +63,7 @@ drop_columns:
   - Cloud3pm
   - Temp9am
   - Temp3pm
+  - RainToday
 
 direction_columns:
   - WindGustDir
@@ -83,7 +84,6 @@ num_columns:
 
 one_hot_columns:
   - Location
-  - RainToday
 
 target_column:
   - RainTomorrow

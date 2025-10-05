@@ -2,6 +2,7 @@ import os
 import sys
 
 import pandas as pd
+import numpy as np
 from imblearn.combine import SMOTEENN
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -12,18 +13,14 @@ from rain_prediction.logger import logging
 from rain_prediction.constants import TARGET_COLUMN, SCHEMA_FILE_PATH
 from rain_prediction.entity.estimator import TargetValueMapping
 from rain_prediction.entity.config_entity import DataTransformationConfig
-from rain_prediction.entity.artifact_entity import (DataIngestionArtifact,
-                                                    DataValidationArtifact,
-                                                    DataCleaningArtifact,
+from rain_prediction.entity.artifact_entity import (DataCleaningArtifact,
                                                     DataTransformationArtifact)
 from rain_prediction.utils.main_utils import (save_obj, save_numpy_array_data,
                                               read_yaml_file, drop_columns)
 
 
 class DataTransformation:
-    def __init__(self, data_ingestion_artifact: DataIngestionArtifact,
-                 data_validation_artifact: DataValidationArtifact,
-                 data_cleaning_artifact: DataCleaningArtifact,
+    def __init__(self, data_cleaning_artifact: DataCleaningArtifact,
                  data_transformation_config: DataTransformationConfig):
         """_summary_
 
@@ -33,8 +30,6 @@ class DataTransformation:
             data_tranformation_config (DataTransformationConfig): _description_
         """
         try:
-            self.data_inegstion_artifact = data_ingestion_artifact
-            self.data_validation_artifact = data_validation_artifact
             self.data_cleaning_artifact = data_cleaning_artifact
             self.data_transformation_config = data_transformation_config
             self._schema_config = read_yaml_file(file_path=SCHEMA_FILE_PATH)
@@ -92,3 +87,58 @@ class DataTransformation:
             train_dataframe = DataTransformation.read_file(file_path=self.data_cleaning_artifact.cleaned_train_file_path)
             test_dataframe = DataTransformation.read_file(file_path=self.data_cleaning_artifact.cleaned_test_file_path)
             
+            input_feature_train_dataframe = train_dataframe.drop(columns=[TARGET_COLUMN], axis=1)
+            target_feature_train_dataframe = train_dataframe[TARGET_COLUMN].squeeze()
+            
+            target_feature_train_dataframe = target_feature_train_dataframe.replace(
+                TargetValueMapping()._asdict()).infer_objects(copy=False)
+            
+            logging.info("Got train features and test features of training dataset.")
+            
+            input_feature_test_dataframe = test_dataframe.drop(columns=[TARGET_COLUMN], axis=1)
+            target_feature_test_dataframe = test_dataframe[TARGET_COLUMN].squeeze()
+            
+            target_feature_test_dataframe = target_feature_test_dataframe.replace(
+                TargetValueMapping()._asdict()).infer_objects(copy=False)
+
+            logging.info("Got train features and test features of testing dataset.")
+            
+            logging.info("Applying preprocessing object on training dataframe and testing dataframe.")
+            
+            input_feature_train_arr = preprocessor.fit_transform(input_feature_train_dataframe)
+            
+            logging.info("Used the preprocessor object to fit transform the train features.")
+            
+            input_feature_test_arr = preprocessor.fit_transform(input_feature_test_dataframe)
+            
+            logging.info("Applying SMOTEENN on training dataset and testing dataset.")
+            
+            smt = SMOTEENN(sampling_strategy="minority")
+            input_feature_train_final, target_feature_train_final = smt.fit_resample(
+                input_feature_train_arr, target_feature_train_dataframe
+            )
+            input_feature_test_final, target_feature_test_final = smt.fit_resample(
+                input_feature_test_arr, target_feature_test_dataframe
+            )
+            
+            logging.info("Creating train array and test array")
+            
+            train_arr = np.c_[input_feature_train_final, np.array(target_feature_train_final)]
+            test_arr = np.c_[input_feature_test_final, np.array(target_feature_test_final)]
+            
+            logging.info("Saving the preprocessor object, train array and test array.")
+            save_obj(self.data_transformation_config.transformed_object_file_path, preprocessor)
+            save_numpy_array_data(self.data_transformation_config.transformed_train_file_path, array=train_arr)
+            save_numpy_array_data(self.data_transformation_config.transformed_test_file_path, array=test_arr)
+            logging.info("Preprocessor object, train array, test array has been saved.")
+            
+            logging.info("Exited initiate_data_transformation method of DataTransformation class.")
+            
+            data_transformation_artifact = DataTransformationArtifact(
+                transformed_object_file_path=self.data_transformation_config.transformed_object_file_path,
+                transformed_train_file_path=self.data_transformation_config.transformed_train_file_path,
+                transformed_test_file_path=self.data_transformation_config.transformed_test_file_path
+            )
+            return data_transformation_artifact
+        except Exception as e:
+            raise RainPredictionException(e, sys) from e

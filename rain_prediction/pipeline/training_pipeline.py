@@ -4,21 +4,25 @@ from rain_prediction.logger import logging
 from rain_prediction.component.data_ingestion import DataIngestion
 from rain_prediction.component.data_validation import DataValidation
 from rain_prediction.component.data_cleaning import DataCleaning
+from rain_prediction.component.data_transformation import DataTransformation
 
 from rain_prediction.entity.config_entity import (DataIngestionConfig,
                                                   DataCleaningConfig,
-                                                  DataValidationConfig)
+                                                  DataValidationConfig,
+                                                  DataTransformationConfig)
 
 from rain_prediction.entity.artifact_entity import (DataIngestionArtifact,
                                                     DataCleaningArtifact,
-                                                    DataValidationArtifact)
+                                                    DataValidationArtifact,
+                                                    DataTransformationArtifact)
 
 
 class TrainPipeline:
     def __init__(self):
         self.data_ingestion_config = DataIngestionConfig()
-        self.data_cleaning_config = DataCleaningConfig()
         self.data_validation_config = DataValidationConfig()
+        self.data_cleaning_config = DataCleaningConfig()
+        self.data_transformation_config = DataTransformationConfig()
     
     def start_data_ingestion(self) -> DataIngestionArtifact:
         """_summary_
@@ -34,6 +38,7 @@ class TrainPipeline:
             logging.info("Got the train_set and test_set from MongoDB")
             logging.info("Exited the start_data_ingestion method of TrainPipeline class.")
             return data_ingestion_artifact
+        
         except Exception as e:
             raise RainPredictionException(e, sys) from e
     
@@ -53,6 +58,7 @@ class TrainPipeline:
             logging.info("Data Validation completed.")
             logging.info("Exited the start_data_validation method of TrainPipeline class.")
             return data_validation_artifact
+        
         except Exception as e:
             raise RainPredictionException(e, sys) from e
     
@@ -77,6 +83,21 @@ class TrainPipeline:
             logging.info("Data Cleaning completed.")
             logging.info("Exited the start_data_cleaning method of TrainPipeline class.")
             return data_cleaning_artifact
+        
+        except Exception as e:
+            raise RainPredictionException(e, sys) from e
+    
+    def start_data_transformation(self, data_cleaning_artifact: DataCleaningArtifact) -> DataTransformationArtifact:
+        try:
+            logging.info("Entered the start_data_cleaning method of TrainPipeline class.")
+            data_transformation = DataTransformation(data_cleaning_artifact=data_cleaning_artifact,
+                                                     data_transformation_config=self.data_transformation_config)
+            
+            data_transformation_artifact = data_transformation.initiate_data_transformation()
+            logging.info("Data transformation completed.")
+            logging.info("Exited the start_data_transformation method of TrainPipeline class.")
+            return data_transformation_artifact
+        
         except Exception as e:
             raise RainPredictionException(e, sys) from e
     
@@ -88,5 +109,7 @@ class TrainPipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_cleaning_artifact = self.start_data_cleaning(data_ingestion_artifact=data_ingestion_artifact,
                                                                 data_validation_artifact=data_validation_artifact)
+            data_transformation_artifact = self.start_data_transformation(data_cleaning_artifact=data_cleaning_artifact)
+            
         except Exception as e:
             raise RainPredictionException(e, sys) from e

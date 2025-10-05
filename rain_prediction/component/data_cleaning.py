@@ -6,14 +6,13 @@ import numpy as np
 
 from rain_prediction.exception import RainPredictionException
 from rain_prediction.logger import logging
-from rain_prediction.constants import TARGET_COLUMN, SCHEMA_FILE_PATH
+from rain_prediction.constants import SCHEMA_FILE_PATH
 from rain_prediction.entity.config_entity import DataCleaningConfig
 from rain_prediction.entity.artifact_entity import (DataIngestionArtifact,
                                                     DataValidationArtifact,
                                                     DataCleaningArtifact)
 from rain_prediction.entity.estimator import WindDirValueMapping
-from rain_prediction.utils.main_utils import (save_obj, save_numpy_array_data,
-                                              read_yaml_file, drop_columns)
+from rain_prediction.utils.main_utils import read_yaml_file, drop_columns
 
 
 class DataCleaning:
