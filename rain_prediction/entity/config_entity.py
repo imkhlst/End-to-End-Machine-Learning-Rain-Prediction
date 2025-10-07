@@ -63,3 +63,13 @@ class DataTransformationConfig:
     transformed_object_file_path: str = os.path.join(data_transformation_dir,
                                                      DATA_TRANSFORMATION_TRANSFORMED_OBJECT_DIR,
                                                      PREPROCESSING_OBJECT_FILE_NAME)
+
+@dataclass
+class ModelTrainingConfig:
+    model_training_dir: str = os.path.join(training_pipeline_config.artifact_dir,
+                                           MODEL_TRAINING_DIR_NAME)
+    trained_model_file_path: str = os.path.join(model_training_dir,
+                                                MODEL_TRAINING_TRAINED_MODEL_DIR,
+                                                MODEL_TRAINING_TRAINED_MODEL_NAME)
+    expected_accuracy: float = MODEL_TRAINING_EXPECTED_SCORE
+    model_config_file_path: str = MODEL_TRAINING_MODEL_CONFIG_FILE_PATH

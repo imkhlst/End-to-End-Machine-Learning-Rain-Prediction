@@ -98,21 +98,25 @@ class DataCleaning:
                             
                 status = self.is_value_missing(train_dataframe)
                 if status:
+                    logging.info("Missing values is exists.")
                     train_dataframe[numerical_features] = train_dataframe[numerical_features].fillna(train_dataframe[numerical_features].mean())
                     train_dataframe = train_dataframe.dropna(how="any")
                 
                 status = self.is_duplicated(train_dataframe)
                 if status:
+                    logging.info("Duplicated data are exists.")
                     train_dataframe = train_dataframe.drop_duplicates()
                 
                 status = self.is_outliers_detected(train_dataframe)
                 if status:
+                    logging.info("Outliers are exists.")
                     cleaned_train_dataframe = train_dataframe[numerical_features].clip(lower=train_dataframe[numerical_features].quantile(0.01),
                                                                                     upper=train_dataframe[numerical_features].quantile(0.99),
                                                                                     axis=1)
                     non_num_cols = train_dataframe.drop(columns=numerical_features)
                     cleaned_train_dataframe = pd.concat([cleaned_train_dataframe, non_num_cols], axis=1)
                 else:
+                    logging.info("Outlier not exist.")
                     cleaned_train_dataframe = train_dataframe.copy()
                     
                 logging.info("Dropping columns in drop_columns of training dataset.")

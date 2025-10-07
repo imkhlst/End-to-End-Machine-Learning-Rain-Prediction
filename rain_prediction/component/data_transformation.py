@@ -88,18 +88,24 @@ class DataTransformation:
             test_dataframe = DataTransformation.read_file(file_path=self.data_cleaning_artifact.cleaned_test_file_path)
             
             input_feature_train_dataframe = train_dataframe.drop(columns=[TARGET_COLUMN], axis=1)
-            target_feature_train_dataframe = train_dataframe[TARGET_COLUMN].squeeze()
+            target_feature_train_dataframe = train_dataframe[TARGET_COLUMN]
             
             target_feature_train_dataframe = target_feature_train_dataframe.replace(
-                TargetValueMapping()._asdict()).infer_objects(copy=False)
+                TargetValueMapping()._asdict()).infer_objects(copy=False).squeeze()
+            logging.info(f"target_feature_train_dataframe type: {type(target_feature_train_dataframe)}")
+            logging.info(f"target_feature_train_dataframe shape: {getattr(target_feature_train_dataframe, 'shape', None)}")
+            logging.info(f"target_feature_train_dataframe sample:\n{target_feature_train_dataframe.head() if hasattr(target_feature_train_dataframe, 'head') else target_feature_train_dataframe}")
+            target_feature_train_dataframe = np.array(target_feature_train_dataframe).ravel()
             
             logging.info("Got train features and test features of training dataset.")
             
             input_feature_test_dataframe = test_dataframe.drop(columns=[TARGET_COLUMN], axis=1)
-            target_feature_test_dataframe = test_dataframe[TARGET_COLUMN].squeeze()
+            target_feature_test_dataframe = test_dataframe[TARGET_COLUMN]
             
             target_feature_test_dataframe = target_feature_test_dataframe.replace(
-                TargetValueMapping()._asdict()).infer_objects(copy=False)
+                TargetValueMapping()._asdict()).infer_objects(copy=False).squeeze()
+            
+            target_feature_test_dataframe = np.array(target_feature_test_dataframe).ravel()
 
             logging.info("Got train features and test features of testing dataset.")
             
@@ -109,7 +115,7 @@ class DataTransformation:
             
             logging.info("Used the preprocessor object to fit transform the train features.")
             
-            input_feature_test_arr = preprocessor.fit_transform(input_feature_test_dataframe)
+            input_feature_test_arr = preprocessor.transform(input_feature_test_dataframe)
             
             logging.info("Applying SMOTEENN on training dataset and testing dataset.")
             
@@ -117,14 +123,26 @@ class DataTransformation:
             input_feature_train_final, target_feature_train_final = smt.fit_resample(
                 input_feature_train_arr, target_feature_train_dataframe
             )
-            input_feature_test_final, target_feature_test_final = smt.fit_resample(
-                input_feature_test_arr, target_feature_test_dataframe
-            )
+            logging.info(f"type(input_feature_train_final): {type(input_feature_train_final)}")
+            logging.info(f"type(target_feature_train_final): {type(target_feature_train_final)}")
+            logging.info(f"input_feature_train_final shape: {getattr(input_feature_train_final, 'shape', None)}")
+            logging.info(f"target_feature_train_final shape: {getattr(target_feature_train_final, 'shape', None)}")
+            logging.info(f"Sample of target_feature_train_final: {target_feature_train_final[:5] if hasattr(target_feature_train_final, '__getitem__') else target_feature_train_final}")
+
+            if hasattr(input_feature_train_final, "toarray"):
+                input_feature_train_final = input_feature_train_final.toarray()
+
+            if hasattr(input_feature_test_arr, "toarray"):
+                input_feature_test_arr = input_feature_test_arr.toarray()
             
             logging.info("Creating train array and test array")
             
-            train_arr = np.c_[input_feature_train_final, np.array(target_feature_train_final)]
-            test_arr = np.c_[input_feature_test_final, np.array(target_feature_test_final)]
+            train_arr = np.concatenate(
+                [input_feature_train_final, target_feature_train_final.reshape(-1, 1)], axis=1
+            )
+            test_arr = np.concatenate(
+                [input_feature_test_arr, target_feature_test_dataframe.reshape(-1, 1)], axis=1
+            )
             
             logging.info("Saving the preprocessor object, train array and test array.")
             save_obj(self.data_transformation_config.transformed_object_file_path, preprocessor)

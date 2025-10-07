@@ -5,16 +5,19 @@ from rain_prediction.component.data_ingestion import DataIngestion
 from rain_prediction.component.data_validation import DataValidation
 from rain_prediction.component.data_cleaning import DataCleaning
 from rain_prediction.component.data_transformation import DataTransformation
+from rain_prediction.component.model_training import ModelTraining
 
 from rain_prediction.entity.config_entity import (DataIngestionConfig,
                                                   DataCleaningConfig,
                                                   DataValidationConfig,
-                                                  DataTransformationConfig)
+                                                  DataTransformationConfig,
+                                                  ModelTrainingConfig)
 
 from rain_prediction.entity.artifact_entity import (DataIngestionArtifact,
                                                     DataCleaningArtifact,
                                                     DataValidationArtifact,
-                                                    DataTransformationArtifact)
+                                                    DataTransformationArtifact,
+                                                    ModelTrainingArtifact)
 
 
 class TrainPipeline:
@@ -23,6 +26,7 @@ class TrainPipeline:
         self.data_validation_config = DataValidationConfig()
         self.data_cleaning_config = DataCleaningConfig()
         self.data_transformation_config = DataTransformationConfig()
+        self.model_training_config = ModelTrainingConfig()
     
     def start_data_ingestion(self) -> DataIngestionArtifact:
         """_summary_
@@ -89,7 +93,7 @@ class TrainPipeline:
     
     def start_data_transformation(self, data_cleaning_artifact: DataCleaningArtifact) -> DataTransformationArtifact:
         try:
-            logging.info("Entered the start_data_cleaning method of TrainPipeline class.")
+            logging.info("Entered the start_data_transformation method of TrainPipeline class.")
             data_transformation = DataTransformation(data_cleaning_artifact=data_cleaning_artifact,
                                                      data_transformation_config=self.data_transformation_config)
             
@@ -101,6 +105,20 @@ class TrainPipeline:
         except Exception as e:
             raise RainPredictionException(e, sys) from e
     
+    def start_model_training(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainingArtifact:
+        try:
+            logging.info("Entered the start_model_training method of TrainPipeline class.")
+            model_training = ModelTraining(data_transformation_artifact=data_transformation_artifact,
+                                           model_training_config=self.model_training_config)
+            
+            model_training_artifact = model_training.initiate_model_training()
+            logging.info("Model Training completed.")
+            logging.info("Exited the start_model_training method of TrainPipeline class.")
+            return model_training_artifact
+        
+        except Exception as e:
+            raise RainPredictionException(e, sys) from e
+        
     def run_pipeline(self,) -> None:
         """_summary_
         """
@@ -110,6 +128,7 @@ class TrainPipeline:
             data_cleaning_artifact = self.start_data_cleaning(data_ingestion_artifact=data_ingestion_artifact,
                                                                 data_validation_artifact=data_validation_artifact)
             data_transformation_artifact = self.start_data_transformation(data_cleaning_artifact=data_cleaning_artifact)
+            model_training_artifact = self.start_model_training(data_transformation_artifact=data_transformation_artifact)
             
         except Exception as e:
             raise RainPredictionException(e, sys) from e
