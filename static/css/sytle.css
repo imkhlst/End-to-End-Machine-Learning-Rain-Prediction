@@ -1,0 +1,139 @@
+/* === General Reset === */
+body {
+  background: #f7fafc;
+  color: #0f172a;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* === Hero Header === */
+.hero {
+  background: linear-gradient(90deg, #0ea5a4 0%, #0284c7 100%);
+  color: #ffffff;
+  padding: 2.5rem 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.hero h1 {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hero p {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* === Card Styles === */
+.card-compact {
+  box-shadow: 0 6px 18px rgba(8, 13, 23, 0.06);
+  border-radius: 12px;
+  background: #ffffff;
+  transition: all 0.25s ease-in-out;
+}
+
+.card-compact:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(8, 13, 23, 0.08);
+}
+
+/* === Buttons === */
+.btn-primary {
+  background-color: #0284c7;
+  border-color: #0284c7;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0369a1;
+  border-color: #0369a1;
+}
+
+.btn-outline-secondary:hover {
+  color: #0284c7;
+  border-color: #0284c7;
+}
+
+/* === Form Inputs === */
+form label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+form input,
+form select {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+}
+
+form input:focus,
+form select:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 0.15rem rgba(2, 132, 199, 0.25);
+}
+
+/* === Metric Display === */
+.metric {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.small-muted {
+  color: #6b7280;
+}
+
+/* === Prediction Result Box === */
+#prediction-result {
+  font-size: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+/* === Code Block === */
+pre.code {
+  background: #0b1220;
+  color: #cfe8ff;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.9rem;
+}
+
+/* === Footer === */
+footer {
+  color: #6b7280;
+  padding-top: 20px;
+  font-size: 0.9rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 3rem;
+}
+
+/* === File Upload Section === */
+#model-file-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+#btn-upload,
+#btn-download {
+  font-weight: 600;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .card-compact {
+    padding: 1rem;
+  }
+
+  .metric {
+    font-size: 1.15rem;
+  }
+}

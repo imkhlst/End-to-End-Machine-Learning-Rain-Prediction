@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rain Prediction — Model Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f7fafc; color:#0f172a; }
+    .hero { background: linear-gradient(90deg,#0ea5a4 0%, #0284c7 100%); color:white; padding:36px 0; }
+    .card-compact { box-shadow: 0 6px 18px rgba(8, 13, 23, 0.06); border-radius:12px }
+    .metric { font-weight:700; font-size:1.25rem }
+    pre.code { background:#0b1220; color:#cfe8ff; padding:12px; border-radius:8px; overflow:auto }
+    .small-muted { color:#6b7280 }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <h1 class="display-6">Rain Prediction — Model Dashboard</h1>
+          <p class="mb-0">Exploratory dashboard & simple inference UI for the Rain Prediction project</p>
+        </div>
+        <div class="text-end">
+          <small class="small-muted">Version: 1.0 • Model: RandomForest</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container my-5">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="card card-compact p-3 mb-3">
+          <h5 class="mb-3">Quick Predict — Single Record</h5>
+          <form id="predict-form">
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label">Location</label>
+                <select class="form-control" id="Location" name="Location" required>
+                  <option value="" disabled selected>Select Location</option>
+                  <option>Albury</option>
+                  <option>Katherine</option>
+                  <option>MelbourneAirport</option>
+                  <option>Williamtown</option>
+                  <option>Adelaide</option>
+                </select>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">MinTemp</label>
+                <input type="number" step="0.1" class="form-control" name="MinTemp" min="5" max="20" placeholder="5–20 °C" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">MaxTemp</label>
+                <input type="number" step="0.1" class="form-control" name="MaxTemp" min="15" max="40" placeholder="15–40 °C" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">Rainfall</label>
+                <input type="number" step="0.1" class="form-control" name="Rainfall" min="0" max="150" placeholder="0–150 mm" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">WindSpeed9am</label>
+                <input type="number" step="0.1" class="form-control" name="WindSpeed9am" min="0" max="100" placeholder="0–100 km/h" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">WindSpeed3pm</label>
+                <input type="number" step="0.1" class="form-control" name="WindSpeed3pm" min="0" max="100" placeholder="0–100 km/h" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">Humidity9am</label>
+                <input type="number" step="1" class="form-control" name="Humidity9am" min="0" max="100" placeholder="0–100 %" required>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label">Humidity3pm</label>
+                <input type="number" step="1" class="form-control" name="Humidity3pm" min="0" max="100" placeholder="0–100 %" required>
+              </div>
+
+              <div class="col-12 text-end mt-2">
+                <button class="btn btn-primary" type="button" id="btn-predict">Predict</button>
+                <button class="btn btn-outline-secondary" type="reset">Reset</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="mt-3">
+            <h6>Prediction</h6>
+            <div id="prediction-result" class="p-3 bg-white border rounded">No prediction yet.</div>
+          </div>
+        </div>
+
+        <div class="card card-compact p-3 mb-3">
+          <h5 class="mb-3">Model Overview & Metrics</h5>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="p-3 bg-white text-center rounded">
+                <div class="small-muted">Accuracy</div>
+                <div class="metric" id="metric-accuracy">0.91</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-3 bg-white text-center rounded">
+                <div class="small-muted">F1 Score</div>
+                <div class="metric" id="metric-f1">0.88</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-3 bg-white text-center rounded">
+                <div class="small-muted">Precision</div>
+                <div class="metric" id="metric-precision">0.85</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-3 bg-white text-center rounded">
+                <div class="small-muted">Recall</div>
+                <div class="metric" id="metric-recall">0.90</div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+          <p class="small-muted">Model training date: <span id="model-date">Oct 8, 2025</span></p>
+          <p class="small-muted">Last evaluation: <span id="eval-note">Validation set (fold 5)</span></p>
+        </div>
+
+        <div class="card card-compact p-3 mb-3">
+          <h5 class="mb-3">Exploratory Charts (placeholders)</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="p-3 bg-white rounded" id="chart-1">Boxplot / Correlation heatmap</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="p-3 bg-white rounded" id="chart-2">Feature importance</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card card-compact p-3 mb-3">
+          <h6>Model Files</h6>
+          <p class="small-muted">Upload your trained model (.pkl) or download the latest.</p>
+          <div class="mb-2">
+            <input class="form-control form-control-sm" type="file" id="model-file-input">
+          </div>
+          <div class="d-grid gap-2">
+            <button class="btn btn-success" id="btn-upload">Upload to Storage</button>
+            <a href="#" id="btn-download" class="btn btn-outline-primary">Download latest model</a>
+          </div>
+        </div>
+
+        <div class="card card-compact p-3 mb-3">
+          <h6>Data Drift & Validation</h6>
+          <p class="small-muted">Quick checks for data drift and schema mismatch.</p>
+          <ul>
+            <li>PSI / KS tests</li>
+            <li>Missing values</li>
+            <li>Feature distribution changes</li>
+          </ul>
+          <a href="#" class="small-muted">Generate detailed report (Evidently / Deepchecks)</a>
+        </div>
+
+        <div class="card card-compact p-3 mb-3">
+          <h6>Deployment</h6>
+          <p class="small-muted">Information about serving endpoint and usage.</p>
+          <pre class="code"># example curl
+curl -X POST https://api.example.com/predict \
+ -H 'Content-Type: application/json' \
+ -d '{"MinTemp":12.3, "MaxTemp":22.5, "Rainfall":0}'
+          </pre>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="mt-4 text-center small-muted">Built for Rain Prediction project • Generated HTML template</footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('btn-predict').addEventListener('click', async () => {
+      const form = document.getElementById('predict-form');
+      const data = Object.fromEntries(new FormData(form).entries());
+      for (const k in data) data[k] = Number(data[k]);
+
+      const willRain = (data.Rainfall > 0.5) || (data.Humidity3pm > 80);
+      const resultEl = document.getElementById('prediction-result');
+      resultEl.innerHTML = `<strong>RainTomorrow:</strong> ${willRain ? 'Yes' : 'No'}<br><small class='small-muted'>rule-based demo</small>`;
+    });
+
+    document.getElementById('btn-upload').addEventListener('click', () => {
+      const fileInput = document.getElementById('model-file-input');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please choose a model file to upload');
+        return;
+      }
+      const file = fileInput.files[0];
+      alert('Upload stub: ' + file.name);
+    });
+  </script>
+</body>
+</html>

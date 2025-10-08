@@ -73,3 +73,19 @@ class ModelTrainingConfig:
                                                 MODEL_TRAINING_TRAINED_MODEL_NAME)
     expected_accuracy: float = MODEL_TRAINING_EXPECTED_SCORE
     model_config_file_path: str = MODEL_TRAINING_MODEL_CONFIG_FILE_PATH
+
+@dataclass
+class ModelEvaluationConfig:
+    changed_threshold_score: float = MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE
+    bucket_name: str = MODEL_BUCKET_NAME
+    s3_model_key_path: str = MODEL_FILE_NAME
+
+@dataclass
+class ModelPushingConfig:
+    bucket_name: str = MODEL_BUCKET_NAME
+    s3_model_key_path: str = MODEL_FILE_NAME
+
+@dataclass
+class RainConfig:
+    model_file_path: str = MODEL_FILE_NAME
+    model_bucket_name: str = MODEL_BUCKET_NAME

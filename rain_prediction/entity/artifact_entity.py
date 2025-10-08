@@ -25,6 +25,7 @@ class DataTransformationArtifact:
 
 @dataclass
 class ClassificationMetricArtifact:
+    accuracy: float
     f1_score: float
     precision_score: float
     recall_score: float
@@ -33,3 +34,15 @@ class ClassificationMetricArtifact:
 class ModelTrainingArtifact:
     trained_model_file_path: str
     metric_artifact: ClassificationMetricArtifact
+
+@dataclass
+class ModelEvaluationArtifact:
+    is_model_accepted: bool
+    changed_accuracy: float
+    s3_model_path: str
+    trained_model_path: str
+
+@dataclass
+class ModelPushingArtifact:
+    bucket_name: str
+    s3_model_key_path: str

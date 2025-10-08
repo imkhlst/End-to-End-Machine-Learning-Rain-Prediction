@@ -6,18 +6,24 @@ from rain_prediction.component.data_validation import DataValidation
 from rain_prediction.component.data_cleaning import DataCleaning
 from rain_prediction.component.data_transformation import DataTransformation
 from rain_prediction.component.model_training import ModelTraining
+from rain_prediction.component.model_evaluation import ModelEvaluation
+from rain_prediction.component.model_pushing import ModelPushing
 
 from rain_prediction.entity.config_entity import (DataIngestionConfig,
                                                   DataCleaningConfig,
                                                   DataValidationConfig,
                                                   DataTransformationConfig,
-                                                  ModelTrainingConfig)
+                                                  ModelTrainingConfig,
+                                                  ModelEvaluationConfig,
+                                                  ModelPushingConfig)
 
 from rain_prediction.entity.artifact_entity import (DataIngestionArtifact,
                                                     DataCleaningArtifact,
                                                     DataValidationArtifact,
                                                     DataTransformationArtifact,
-                                                    ModelTrainingArtifact)
+                                                    ModelTrainingArtifact,
+                                                    ModelEvaluationArtifact,
+                                                    ModelPushingArtifact)
 
 
 class TrainPipeline:
@@ -27,6 +33,8 @@ class TrainPipeline:
         self.data_cleaning_config = DataCleaningConfig()
         self.data_transformation_config = DataTransformationConfig()
         self.model_training_config = ModelTrainingConfig()
+        self.model_evaluation_config = ModelEvaluationConfig()
+        self.model_pushing_config = ModelPushingConfig()
     
     def start_data_ingestion(self) -> DataIngestionArtifact:
         """_summary_
@@ -118,6 +126,36 @@ class TrainPipeline:
         
         except Exception as e:
             raise RainPredictionException(e, sys) from e
+    
+    def start_model_evaluation(self, data_cleaning_artifact: DataCleaningArtifact,
+                               model_training_artifact: ModelTrainingArtifact) -> ModelEvaluationArtifact:
+        try:
+            logging.info("Entered the start_model_evaluation method of TrainPipeline class.")
+            model_evaluation = ModelEvaluation(data_cleaning_artifact=data_cleaning_artifact,
+                                              model_training_artifact=model_training_artifact,
+                                              model_evaluation_config=self.model_evaluation_config)
+            
+            model_evaluation_artifact = model_evaluation.initiate_model_evaluation()
+            logging.info("Model Evaluation completed.")
+            logging.info("Exited the start_model_evaluation method of TrainPipeline class.")
+            return model_evaluation_artifact
+        
+        except Exception as e:
+            raise RainPredictionException(e, sys) from e
+        
+    def start_model_pushing(self, model_evaluation_artifact: ModelEvaluationArtifact) -> ModelPushingArtifact:
+        try:
+            logging.info("Entered the start_model_pushing method of TrainPipeline class.")
+            model_pushing = ModelPushing(model_evaluation_artifact=model_evaluation_artifact,
+                                         model_pushing_config=self.model_pushing_config)
+            
+            model_pushing_artifact = model_pushing.initiate_model_pushing()
+            logging.info("Model Training completed.")
+            logging.info("Exited the start_model_pushing method of TrainPipeline class.")
+            return model_pushing_artifact
+        
+        except Exception as e:
+            raise RainPredictionException(e, sys) from e
         
     def run_pipeline(self,) -> None:
         """_summary_
@@ -129,6 +167,14 @@ class TrainPipeline:
                                                                 data_validation_artifact=data_validation_artifact)
             data_transformation_artifact = self.start_data_transformation(data_cleaning_artifact=data_cleaning_artifact)
             model_training_artifact = self.start_model_training(data_transformation_artifact=data_transformation_artifact)
+            model_evaluation_artifact = self.start_model_evaluation(data_cleaning_artifact=data_cleaning_artifact,
+                                                                    model_training_artifact=model_training_artifact)
+            
+            if not model_evaluation_artifact.is_model_accepted:
+                logging.info(f"Model not accepted.")
+                return None
+            
+            model_pushing_artifact = self.start_model_pushing(model_evaluation_artifact=model_evaluation_artifact)
             
         except Exception as e:
             raise RainPredictionException(e, sys) from e
