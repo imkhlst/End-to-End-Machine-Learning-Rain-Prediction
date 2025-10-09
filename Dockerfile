@@ -8,9 +8,9 @@ COPY . /app/
 RUN pip install --upgrade pip
 
 # Install numpy first and pin it BEFORE installing others
-RUN pip install numpy==1.26.4
+RUN pip install "numpy<2.0"
 
 # Then install other dependencies (avoid upgrading numpy again)
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 CMD ["python3", "app.py"]
