@@ -1,4 +1,4 @@
-# End-to-End-Machine-Learning-Rain-Prediction
+# End-to-End-MLOps-Rain-Prediction
 
 ### Early Setup
 1. Create an repo on your github.
@@ -121,4 +121,5 @@ setting > Secrets and variables > New Repository secret > Upload repository name
 - AWS_SECRET_ACCESS_KEY
 - AWS_DEFAULT_REGION
 - ECR_REPO
+
 ```
